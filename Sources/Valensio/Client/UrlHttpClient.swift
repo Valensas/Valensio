@@ -9,7 +9,7 @@
 import Foundation
 
 open class UrlHttpClient: HttpClient {
-    let baseUrl: URL
+    public let baseUrl: URL
 
     public init(
         baseUrl: URL,
