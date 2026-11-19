@@ -54,9 +54,8 @@ open class HttpClient {
             httpRequest.body?.terminate()
         }
 
-        let response = try await request(httpRequest)
-
         do {
+            let response = try await request(httpRequest)
             // We expect no response body, do not try to decode
             if let nothing = Nothing.instance as? Response {
                 return nothing
@@ -81,9 +80,10 @@ open class HttpClient {
             task.delegate = uploader
             task.resume()
 
+            nonisolated(unsafe) let write = request.body?.write
             DispatchQueue.global(qos: .utility).async {
                 do {
-                    try request.body?.write?()
+                    try write?()
                 } catch {
                     // Remove continuation to prevent double resume
                     uploader.continuation = nil
