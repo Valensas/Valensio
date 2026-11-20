@@ -8,22 +8,25 @@
 import OSLog
 import Foundation
 
-public protocol TokenRefresher: Sendable {
-    func getToken(fromRefreshToken token: String) async throws -> Token
+public protocol TokenRefresher<Credential>: Sendable {
+    associatedtype Credential: BearerCredential
+    func getToken(fromRefreshToken token: String) async throws -> Credential
 }
 
-public protocol TokenStore {
-    var token: Token? { get set }
+public protocol TokenStore<Credential> {
+    associatedtype Credential: BearerCredential
+    var token: Credential? { get set }
 }
 
-public class RefreshTokenInterceptor: HttpInterceptor {
-    public let tokenRefresher: TokenRefresher
-    public var tokenStore: TokenStore
+public class RefreshTokenInterceptor<Refresher: TokenRefresher, Store: TokenStore>: HttpInterceptor
+where Refresher.Credential == Store.Credential {
+    public let tokenRefresher: Refresher
+    public var tokenStore: Store
 
-    private var refreshTokenTask: Task<Token, any Error>?
+    private var refreshTokenTask: Task<Store.Credential, any Error>?
     private let logger = Logger()
 
-    public init(refresher: TokenRefresher, tokenStore: TokenStore) {
+    public init(refresher: Refresher, tokenStore: Store) {
         self.tokenStore = tokenStore
         self.tokenRefresher = refresher
     }

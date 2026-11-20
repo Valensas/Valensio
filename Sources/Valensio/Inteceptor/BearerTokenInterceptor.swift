@@ -8,10 +8,10 @@
 import SwiftUI
 import Foundation
 
-public class BearerTokenInterceptor: HttpInterceptor {
-    let tokenStore: TokenStore
+public class BearerTokenInterceptor<Store: TokenStore>: HttpInterceptor {
+    let tokenStore: Store
 
-    public init(tokenStore: TokenStore) {
+    public init(tokenStore: Store) {
         self.tokenStore = tokenStore
     }
 
@@ -21,7 +21,7 @@ public class BearerTokenInterceptor: HttpInterceptor {
         }
 
         var newRequest = request.urlRequest
-        newRequest.setValue("Bearer \(token.idToken)", forHTTPHeaderField: "Authorization")
+        newRequest.setValue("Bearer \(token.bearerToken)", forHTTPHeaderField: "Authorization")
         return try await chain(.init(urlRequest: newRequest, body: request.body))
     }
 }
