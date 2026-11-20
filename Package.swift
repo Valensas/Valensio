@@ -13,13 +13,22 @@ let package = Package(
             name: "Valensio",
             targets: ["Valensio"]),
     ],
+    dependencies: [
+        // Test-only: an embedded HTTP server used to stub httpbin endpoints.
+        // Not referenced by the `Valensio` library target, so it is never
+        // resolved or built for downstream consumers of the package.
+        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "2.0.0"),
+    ],
     targets: [
         .target(
             name: "Valensio"
         ),
         .testTarget(
             name: "ValensioTests",
-            dependencies: ["Valensio"],
+            dependencies: [
+                "Valensio",
+                .product(name: "Hummingbird", package: "hummingbird"),
+            ],
             resources: [
                 .copy("Resources/Sample File.txt")
             ]

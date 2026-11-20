@@ -10,7 +10,16 @@ import Valensio
 import Testing
 
 class UrlHttpClientTests {
-    let client = UrlHttpClient(baseUrl: URL.httpbin, decoder: JSONDecoder(), encoder: JSONEncoder())
+    let client: UrlHttpClient
+
+    init() async throws {
+        if #available(iOS 17, macOS 14, tvOS 17, watchOS 10, visionOS 1, *) {
+            let baseURL = try await HttpBinServer.shared.baseURL()
+            client = UrlHttpClient(baseUrl: baseURL, decoder: JSONDecoder(), encoder: JSONEncoder())
+        } else {
+            client = UrlHttpClient(baseUrl: URL.httpbin, decoder: JSONDecoder(), encoder: JSONEncoder())
+        }
+    }
 
 	@Test
     func canRequest() async throws {

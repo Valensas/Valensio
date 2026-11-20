@@ -25,8 +25,16 @@ struct SampleRequest: Codable, Equatable {
 }
 
 struct HttpClientTests {
-    let baseUrl = URL.httpbin
+    let baseUrl: URL
     let client = HttpClient(decoder: JSONDecoder(), encoder: JSONEncoder())
+
+    init() async throws {
+        if #available(iOS 17, macOS 14, tvOS 17, watchOS 10, visionOS 1, *) {
+            baseUrl = try await HttpBinServer.shared.baseURL()
+        } else {
+            baseUrl = URL.httpbin
+        }
+    }
 
     @Test
     func canSendGetRequest() async throws {
