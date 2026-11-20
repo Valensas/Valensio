@@ -29,7 +29,7 @@ Valensio is distributed through Swift Package Manager (SPM).
 
 1. Open your project in Xcode.
 2. Select **File → Add Package Dependencies...**
-3. Enter the Valensio repository URL.
+3. Enter the repository URL: `https://github.com/Valensas/Valensio.git`
 4. Select the desired version or version range.
 5. Add the `Valensio` package product to your application target.
 
@@ -39,7 +39,7 @@ Add Valensio to the `dependencies` array in your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "<your-repo-url>", from: "1.0.0")
+    .package(url: "https://github.com/Valensas/Valensio.git", from: "1.0.0")
 ]
 ```
 
@@ -51,8 +51,6 @@ Then add `Valensio` to the dependencies of your target:
     dependencies: ["Valensio"]
 )
 ```
-
-Replace `<your-repo-url>` with the actual repository URL.
 
 ## Usage
 
@@ -94,3 +92,7 @@ Run the tests with:
 ```sh
 swift test
 ```
+
+## License
+
+Valensio is available under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for the full text.
