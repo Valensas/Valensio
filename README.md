@@ -11,7 +11,7 @@ Valensio provides a small, composable API with a request pipeline, interceptors,
 - **Interceptors** — A composable `HttpInterceptor` chain for cross-cutting concerns, including:
   - `BasicAuthInterceptor` — Adds HTTP Basic authentication.
   - `BearerTokenInterceptor` — Attaches bearer tokens from a token store.
-  - `RefreshTokenInterceptor` — Automatically refreshes expired tokens on `401` responses and retries the request, signing out on failure.
+  - `RefreshTokenInterceptor` — Automatically refreshes expired tokens on `401` responses and retries the request, signing out on failure. Requests failing together share one refresh, and a refresh token is never sent twice. When to refresh, when to sign out and whether to retry the refresh are configurable (see [Token refresh](#token-refresh)).
 - **OIDC** — `OIDCClient` provides sign-in through `ASWebAuthenticationSession`, token refresh, and sign-out, along with token-expiry inspection (`TokenExpiry`) for PASETO/JWT.
 - **Body encoding** — Supports JSON, `application/x-www-form-urlencoded` (`URLFormEncoder`), and streamed `multipart/form-data` (`MultipartFormDataEncoder`), including file uploads.
 
@@ -73,6 +73,29 @@ let created: Item = try await client.request(
     body: NewItem(name: "Widget")
 )
 ```
+
+### Token refresh
+
+`RefreshTokenInterceptor` takes a `RefreshTokenConfiguration`. Every option defaults to the original behaviour: refresh on any `401`, sign out on any refresh error or on a `401` after the refresh, and no retry.
+
+```swift
+let store = MyTokenStore()
+let interceptors: [any HttpInterceptor] = [
+    RefreshTokenInterceptor(
+        refresher: MyTokenRefresher(),
+        tokenStore: store,
+        configuration: .init(
+            refreshTrigger: .invalidTokenChallenge,        // only `WWW-Authenticate: Bearer error="invalid_token"`
+            signOutPolicy: .onInvalidGrant,                // only `400 {"error": "invalid_grant"}` ends the session
+            signOutOnUnauthorizedAfterRefresh: false,      // rethrow the 401, keep the tokens
+            retryPolicy: RetryPolicy(maxRetries: 2, initialDelay: 1) // 503 → retry after 1s, then 2s
+        )
+    ),
+    BearerTokenInterceptor(tokenStore: store),
+]
+```
+
+When the sign-out policy keeps the session, the refresh error (for example a `URLError`) is rethrown to the caller. Share one `RefreshTokenInterceptor` instance between all clients that use the same tokens, so they also share its refresh. `HttpStatusError.headers` gives access to the response headers.
 
 ## Testing
 
