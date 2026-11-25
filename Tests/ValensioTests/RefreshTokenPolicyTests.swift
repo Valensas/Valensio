@@ -12,7 +12,7 @@ struct RefreshTokenPolicyTests {
     private let request = HttpRequest(urlRequest: URLRequest(url: URL.httpbin), body: nil)
     private let ok = HttpResponse(urlResponse: URLResponse(), data: Data())
 
-    /// The settings mobile apps use to match the OAuth refresh rules on Android.
+    /// The settings apps use to match the standard OAuth refresh rules.
     private let oauthConfiguration = RefreshTokenConfiguration(
         refreshTrigger: .invalidTokenChallenge,
         signOutPolicy: .onInvalidGrant,
