@@ -136,7 +136,12 @@ open class HttpClient {
             return
         default:
             logHttpResponseError(data: response.data, request: request, response: httpResponse)
-            throw HttpStatusError(status: httpResponse.statusCode, data: response.data)
+            let headers = httpResponse.allHeaderFields.reduce(into: [String: String]()) { headers, field in
+                if let name = field.key as? String {
+                    headers[name] = "\(field.value)"
+                }
+            }
+            throw HttpStatusError(status: httpResponse.statusCode, data: response.data, headers: headers)
         }
     }
 

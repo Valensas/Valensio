@@ -87,6 +87,8 @@ struct HttpClientTests {
             try await client.request(method: .get, url: baseUrl.appendingPathComponent("/status/400"))
         }
         #expect(error?.status == 400)
+        #expect(error?.headers.isEmpty == false)
+        #expect(error?.header("CONTENT-LENGTH") == error?.header("content-length"))
     }
 
     @Test
